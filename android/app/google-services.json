@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "835225532599",
+    "project_id": "auth-453b4",
+    "storage_bucket": "auth-453b4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835225532599:android:81ece3948fc7999012b532",
+        "android_client_info": {
+          "package_name": "com.example.medical_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAE4EkDZs4KPdha-pXeYLgCkJwlic9wyOs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835225532599:android:c257bd2b9665e6ca12b532",
+        "android_client_info": {
+          "package_name": "com.example.medical_app1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAE4EkDZs4KPdha-pXeYLgCkJwlic9wyOs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
