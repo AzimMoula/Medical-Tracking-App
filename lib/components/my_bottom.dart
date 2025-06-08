@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class MyBottom extends StatelessWidget {
   final Function()? onTap; 
-  const MyBottom({super.key,required this.onTap});
+  final String text;
+  const MyBottom({super.key,required this.onTap, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,7 @@ class MyBottom extends StatelessWidget {
         ),
         child: Center( // ← Ensures text stays centered
           child: Text(
-            "Sign In",
+           text ,
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
