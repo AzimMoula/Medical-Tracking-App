@@ -27,7 +27,7 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
 
   Future<void> _loadMedicationHistory() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final user = AuthService.getCurrentUser();
       if (user == null) return;
@@ -51,7 +51,7 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
 
       // Load medication history (last 30 days)
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-      
+
       final historySnapshot = await FirebaseFirestore.instance
           .collection('medication_history')
           .doc(user.uid)
@@ -61,11 +61,11 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
           .get();
 
       final Map<String, List<MedicationHistory>> tempHistory = {};
-      
+
       for (final doc in historySnapshot.docs) {
         final data = doc.data();
         final medicationId = data['medication_id'] as String;
-        
+
         final history = MedicationHistory(
           id: doc.id,
           medicationId: medicationId,
@@ -102,9 +102,10 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
   }
 
   // TODO: Remove this method after reviewing the UI
-  void _addTestDataForDemonstration(Map<String, List<MedicationHistory>> tempHistory) {
+  void _addTestDataForDemonstration(
+      Map<String, List<MedicationHistory>> tempHistory) {
     final now = DateTime.now();
-    
+
     // Add test medications if none exist
     if (_medicationDetails.isEmpty) {
       _medicationDetails['test_aspirin'] = MedicationDetails(
@@ -113,21 +114,21 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
         category: 'bp_control',
         type: 'pill',
       );
-      
+
       _medicationDetails['test_metformin'] = MedicationDetails(
         id: 'test_metformin',
         name: 'Metformin 500mg',
         category: 'diabetes',
         type: 'pill',
       );
-      
+
       _medicationDetails['test_vitamin_d'] = MedicationDetails(
         id: 'test_vitamin_d',
         name: 'Vitamin D3',
         category: 'vitamins',
         type: 'pill',
       );
-      
+
       _medicationDetails['test_ibuprofen'] = MedicationDetails(
         id: 'test_ibuprofen',
         name: 'Ibuprofen 400mg',
@@ -135,95 +136,113 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
         type: 'pill',
       );
     }
-    
+
     // Generate test history for the past 14 days
     for (int i = 0; i < 14; i++) {
       final date = now.subtract(Duration(days: i));
-      
+
       // Aspirin - morning dose (mostly taken, some missed)
-      if (i < 12) { // Skip last 2 days to show recent missed
+      if (i < 12) {
+        // Skip last 2 days to show recent missed
         tempHistory.putIfAbsent('test_aspirin', () => []).add(
-          MedicationHistory(
-            id: 'test_aspirin_${i}_morning',
-            medicationId: 'test_aspirin',
-            medicationName: 'Aspirin 100mg',
-            dosage: '100mg',
-            scheduledTime: DateTime(date.year, date.month, date.day, 8, 0),
-            actualTime: i == 2 || i == 7 ? null : DateTime(date.year, date.month, date.day, 8, i % 2 == 0 ? 5 : 15),
-            status: i == 2 || i == 7 ? MedicationStatus.missed : MedicationStatus.taken,
-            notes: i == 5 ? 'Took with breakfast' : '',
-          ),
-        );
+              MedicationHistory(
+                id: 'test_aspirin_${i}_morning',
+                medicationId: 'test_aspirin',
+                medicationName: 'Aspirin 100mg',
+                dosage: '100mg',
+                scheduledTime: DateTime(date.year, date.month, date.day, 8, 0),
+                actualTime: i == 2 || i == 7
+                    ? null
+                    : DateTime(date.year, date.month, date.day, 8,
+                        i % 2 == 0 ? 5 : 15),
+                status: i == 2 || i == 7
+                    ? MedicationStatus.missed
+                    : MedicationStatus.taken,
+                notes: i == 5 ? 'Took with breakfast' : '',
+              ),
+            );
       }
-      
+
       // Aspirin - evening dose
       if (i < 10) {
         tempHistory.putIfAbsent('test_aspirin', () => []).add(
-          MedicationHistory(
-            id: 'test_aspirin_${i}_evening',
-            medicationId: 'test_aspirin',
-            medicationName: 'Aspirin 100mg',
-            dosage: '100mg',
-            scheduledTime: DateTime(date.year, date.month, date.day, 20, 0),
-            actualTime: i == 4 ? null : DateTime(date.year, date.month, date.day, 20, i % 3 == 0 ? 10 : 5),
-            status: i == 4 ? MedicationStatus.skipped : MedicationStatus.taken,
-            notes: i == 4 ? 'Skipped - forgot to bring medication' : '',
-          ),
-        );
+              MedicationHistory(
+                id: 'test_aspirin_${i}_evening',
+                medicationId: 'test_aspirin',
+                medicationName: 'Aspirin 100mg',
+                dosage: '100mg',
+                scheduledTime: DateTime(date.year, date.month, date.day, 20, 0),
+                actualTime: i == 4
+                    ? null
+                    : DateTime(date.year, date.month, date.day, 20,
+                        i % 3 == 0 ? 10 : 5),
+                status:
+                    i == 4 ? MedicationStatus.skipped : MedicationStatus.taken,
+                notes: i == 4 ? 'Skipped - forgot to bring medication' : '',
+              ),
+            );
       }
-      
+
       // Metformin - with meals
       if (i < 13) {
         for (int meal = 0; meal < 3; meal++) {
           final hour = meal == 0 ? 8 : (meal == 1 ? 13 : 19);
-          final mealName = meal == 0 ? 'breakfast' : (meal == 1 ? 'lunch' : 'dinner');
-          
+          final mealName =
+              meal == 0 ? 'breakfast' : (meal == 1 ? 'lunch' : 'dinner');
+
           tempHistory.putIfAbsent('test_metformin', () => []).add(
-            MedicationHistory(
-              id: 'test_metformin_${i}_$meal',
-              medicationId: 'test_metformin',
-              medicationName: 'Metformin 500mg',
-              dosage: '500mg',
-              scheduledTime: DateTime(date.year, date.month, date.day, hour, 0),
-              actualTime: (i == 1 && meal == 1) || (i == 6 && meal == 2) ? null : 
-                         DateTime(date.year, date.month, date.day, hour, 15),
-              status: (i == 1 && meal == 1) || (i == 6 && meal == 2) ? MedicationStatus.missed : MedicationStatus.taken,
-              notes: meal == 0 ? 'With $mealName' : '',
-            ),
-          );
+                MedicationHistory(
+                  id: 'test_metformin_${i}_$meal',
+                  medicationId: 'test_metformin',
+                  medicationName: 'Metformin 500mg',
+                  dosage: '500mg',
+                  scheduledTime:
+                      DateTime(date.year, date.month, date.day, hour, 0),
+                  actualTime: (i == 1 && meal == 1) || (i == 6 && meal == 2)
+                      ? null
+                      : DateTime(date.year, date.month, date.day, hour, 15),
+                  status: (i == 1 && meal == 1) || (i == 6 && meal == 2)
+                      ? MedicationStatus.missed
+                      : MedicationStatus.taken,
+                  notes: meal == 0 ? 'With $mealName' : '',
+                ),
+              );
         }
       }
-      
+
       // Vitamin D - once daily
-      if (i < 10 && i % 2 == 0) { // Every other day for the past 10 days
+      if (i < 10 && i % 2 == 0) {
+        // Every other day for the past 10 days
         tempHistory.putIfAbsent('test_vitamin_d', () => []).add(
-          MedicationHistory(
-            id: 'test_vitamin_d_$i',
-            medicationId: 'test_vitamin_d',
-            medicationName: 'Vitamin D3',
-            dosage: '1000 IU',
-            scheduledTime: DateTime(date.year, date.month, date.day, 9, 0),
-            actualTime: DateTime(date.year, date.month, date.day, 9, 20),
-            status: MedicationStatus.taken,
-            notes: i == 8 ? 'Weekly vitamin dose' : '',
-          ),
-        );
+              MedicationHistory(
+                id: 'test_vitamin_d_$i',
+                medicationId: 'test_vitamin_d',
+                medicationName: 'Vitamin D3',
+                dosage: '1000 IU',
+                scheduledTime: DateTime(date.year, date.month, date.day, 9, 0),
+                actualTime: DateTime(date.year, date.month, date.day, 9, 20),
+                status: MedicationStatus.taken,
+                notes: i == 8 ? 'Weekly vitamin dose' : '',
+              ),
+            );
       }
-      
+
       // Ibuprofen - as needed (sporadic)
       if (i == 1 || i == 5 || i == 9) {
         tempHistory.putIfAbsent('test_ibuprofen', () => []).add(
-          MedicationHistory(
-            id: 'test_ibuprofen_$i',
-            medicationId: 'test_ibuprofen',
-            medicationName: 'Ibuprofen 400mg',
-            dosage: '400mg',
-            scheduledTime: DateTime(date.year, date.month, date.day, 14, 0),
-            actualTime: DateTime(date.year, date.month, date.day, 14, 30),
-            status: MedicationStatus.taken,
-            notes: i == 5 ? 'For headache' : (i == 9 ? 'For back pain' : 'For muscle pain'),
-          ),
-        );
+              MedicationHistory(
+                id: 'test_ibuprofen_$i',
+                medicationId: 'test_ibuprofen',
+                medicationName: 'Ibuprofen 400mg',
+                dosage: '400mg',
+                scheduledTime: DateTime(date.year, date.month, date.day, 14, 0),
+                actualTime: DateTime(date.year, date.month, date.day, 14, 30),
+                status: MedicationStatus.taken,
+                notes: i == 5
+                    ? 'For headache'
+                    : (i == 9 ? 'For back pain' : 'For muscle pain'),
+              ),
+            );
       }
     }
   }
@@ -338,7 +357,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.purple.withAlpha(50),
                   borderRadius: BorderRadius.circular(20),
@@ -347,7 +367,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.calendar_today, size: 16, color: Colors.purple),
+                    const Icon(Icons.calendar_today,
+                        size: 16, color: Colors.purple),
                     const SizedBox(width: 6),
                     Text(
                       'Selected: ${DateFormat('MMM dd, yyyy').format(_selectedDate)}',
@@ -383,7 +404,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                   const Spacer(),
                   if (_getHistoryForDate(_selectedDate).isNotEmpty)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.blue.withAlpha(50),
                         borderRadius: BorderRadius.circular(12),
@@ -400,13 +422,13 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               // Summary for the day
               if (_getHistoryForDate(_selectedDate).isNotEmpty) ...[
                 _buildDaySummary(_selectedDate),
                 const SizedBox(height: 12),
               ],
-              
+
               Expanded(
                 child: _getHistoryForDate(_selectedDate).isEmpty
                     ? Center(
@@ -441,7 +463,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                     : ListView.builder(
                         itemCount: _getHistoryForDate(_selectedDate).length,
                         itemBuilder: (context, index) {
-                          final history = _getHistoryForDate(_selectedDate)[index];
+                          final history =
+                              _getHistoryForDate(_selectedDate)[index];
                           return _buildHistoryListTile(history);
                         },
                       ),
@@ -454,8 +477,10 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
   }
 
   Widget _buildCalendarGrid() {
-    final daysInMonth = DateTime(_selectedDate.year, _selectedDate.month + 1, 0).day;
-    final firstDayOfMonth = DateTime(_selectedDate.year, _selectedDate.month, 1);
+    final daysInMonth =
+        DateTime(_selectedDate.year, _selectedDate.month + 1, 0).day;
+    final firstDayOfMonth =
+        DateTime(_selectedDate.year, _selectedDate.month, 1);
     final firstWeekday = firstDayOfMonth.weekday % 7; // 0 = Sunday
 
     return GridView.builder(
@@ -480,8 +505,10 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
 
         return GestureDetector(
           onTap: () {
-            debugPrint('📅 Calendar date tapped: ${DateFormat('yyyy-MM-dd').format(date)}');
-            debugPrint('🔍 History for this date: ${_getHistoryForDate(date).length} entries');
+            debugPrint(
+                '📅 Calendar date tapped: ${DateFormat('yyyy-MM-dd').format(date)}');
+            debugPrint(
+                '🔍 History for this date: ${_getHistoryForDate(date).length} entries');
             setState(() {
               _selectedDate = date;
             });
@@ -495,14 +522,14 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                       : Colors.white,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: isSelected 
-                    ? Colors.purple 
-                    : isToday 
+                color: isSelected
+                    ? Colors.purple
+                    : isToday
                         ? Colors.purple.withAlpha(150)
                         : Colors.grey.shade300,
                 width: isSelected ? 2 : 1,
               ),
-              boxShadow: isSelected 
+              boxShadow: isSelected
                   ? [
                       BoxShadow(
                         color: Colors.purple.withAlpha(100),
@@ -527,7 +554,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (historyForDay.any((h) => h.status == MedicationStatus.taken))
+                      if (historyForDay
+                          .any((h) => h.status == MedicationStatus.taken))
                         Container(
                           width: 6,
                           height: 6,
@@ -536,7 +564,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                             shape: BoxShape.circle,
                           ),
                         ),
-                      if (historyForDay.any((h) => h.status == MedicationStatus.missed))
+                      if (historyForDay
+                          .any((h) => h.status == MedicationStatus.missed))
                         Container(
                           width: 6,
                           height: 6,
@@ -546,7 +575,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                             shape: BoxShape.circle,
                           ),
                         ),
-                      if (historyForDay.any((h) => h.status == MedicationStatus.skipped))
+                      if (historyForDay
+                          .any((h) => h.status == MedicationStatus.skipped))
                         Container(
                           width: 6,
                           height: 6,
@@ -575,33 +605,33 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
         children: [
           // Overall Statistics
           _buildOverallStats(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Weekly Adherence Trend
           _buildWeeklyTrend(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Medication Timing Analysis
           _buildTimingAnalysis(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Medication-wise Charts
           const Text(
             '💊 Individual Medication Analysis',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          
+
           ..._medicationDetails.entries.map((entry) {
             final medicationId = entry.key;
             final medication = entry.value;
             final history = _historyData[medicationId] ?? [];
-            
+
             if (history.isEmpty) return const SizedBox.shrink();
-            
+
             return Column(
               children: [
                 _buildMedicationChart(medication, history),
@@ -617,11 +647,15 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
   Widget _buildOverallStats() {
     final allHistory = _historyData.values.expand((list) => list).toList();
     final totalMedications = allHistory.length;
-    final takenCount = allHistory.where((h) => h.status == MedicationStatus.taken).length;
-    final missedCount = allHistory.where((h) => h.status == MedicationStatus.missed).length;
-    final skippedCount = allHistory.where((h) => h.status == MedicationStatus.skipped).length;
-    
-    final adherenceRate = totalMedications > 0 ? (takenCount / totalMedications * 100) : 0.0;
+    final takenCount =
+        allHistory.where((h) => h.status == MedicationStatus.taken).length;
+    final missedCount =
+        allHistory.where((h) => h.status == MedicationStatus.missed).length;
+    final skippedCount =
+        allHistory.where((h) => h.status == MedicationStatus.skipped).length;
+
+    final adherenceRate =
+        totalMedications > 0 ? (takenCount / totalMedications * 100) : 0.0;
 
     return Card(
       elevation: 4,
@@ -694,7 +728,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
     );
   }
 
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+  Widget _buildStatCard(
+      String title, String value, Color color, IconData icon) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -727,19 +762,26 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
     );
   }
 
-  Widget _buildMedicationChart(MedicationDetails medication, List<MedicationHistory> history) {
-    final takenCount = history.where((h) => h.status == MedicationStatus.taken).length;
-    final missedCount = history.where((h) => h.status == MedicationStatus.missed).length;
-    final skippedCount = history.where((h) => h.status == MedicationStatus.skipped).length;
+  Widget _buildMedicationChart(
+      MedicationDetails medication, List<MedicationHistory> history) {
+    final takenCount =
+        history.where((h) => h.status == MedicationStatus.taken).length;
+    final missedCount =
+        history.where((h) => h.status == MedicationStatus.missed).length;
+    final skippedCount =
+        history.where((h) => h.status == MedicationStatus.skipped).length;
     final total = history.length;
     final adherenceRate = total > 0 ? (takenCount / total * 100) : 0.0;
-    
+
     // Get recent activity (last 7 days)
     final weekAgo = DateTime.now().subtract(const Duration(days: 7));
-    final recentHistory = history.where((h) => h.scheduledTime.isAfter(weekAgo)).toList();
-    final recentTaken = recentHistory.where((h) => h.status == MedicationStatus.taken).length;
+    final recentHistory =
+        history.where((h) => h.scheduledTime.isAfter(weekAgo)).toList();
+    final recentTaken =
+        recentHistory.where((h) => h.status == MedicationStatus.taken).length;
     final recentTotal = recentHistory.length;
-    final recentRate = recentTotal > 0 ? (recentTaken / recentTotal * 100) : 0.0;
+    final recentRate =
+        recentTotal > 0 ? (recentTaken / recentTotal * 100) : 0.0;
 
     return Card(
       elevation: 3,
@@ -758,7 +800,9 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
-                    medication.type == 'pill' ? Icons.medication : Icons.local_drink,
+                    medication.type == 'pill'
+                        ? Icons.medication
+                        : Icons.local_drink,
                     color: _getCategoryColor(medication.category),
                     size: 24,
                   ),
@@ -811,37 +855,52 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Recent Performance Indicator
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: recentRate >= 80 ? Colors.green.withAlpha(30) : 
-                       recentRate >= 60 ? Colors.orange.withAlpha(30) : Colors.red.withAlpha(30),
+                color: recentRate >= 80
+                    ? Colors.green.withAlpha(30)
+                    : recentRate >= 60
+                        ? Colors.orange.withAlpha(30)
+                        : Colors.red.withAlpha(30),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: recentRate >= 80 ? Colors.green : 
-                         recentRate >= 60 ? Colors.orange : Colors.red,
+                  color: recentRate >= 80
+                      ? Colors.green
+                      : recentRate >= 60
+                          ? Colors.orange
+                          : Colors.red,
                   width: 1,
                 ),
               ),
               child: Row(
                 children: [
                   Icon(
-                    recentRate >= 80 ? Icons.trending_up : 
-                    recentRate >= 60 ? Icons.trending_flat : Icons.trending_down,
-                    color: recentRate >= 80 ? Colors.green : 
-                           recentRate >= 60 ? Colors.orange : Colors.red,
+                    recentRate >= 80
+                        ? Icons.trending_up
+                        : recentRate >= 60
+                            ? Icons.trending_flat
+                            : Icons.trending_down,
+                    color: recentRate >= 80
+                        ? Colors.green
+                        : recentRate >= 60
+                            ? Colors.orange
+                            : Colors.red,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Last 7 days: ${recentRate.toStringAsFixed(1)}% ($recentTaken/$recentTotal)',
                     style: TextStyle(
-                      color: recentRate >= 80 ? Colors.green.shade700 : 
-                             recentRate >= 60 ? Colors.orange.shade700 : Colors.red.shade700,
+                      color: recentRate >= 80
+                          ? Colors.green.shade700
+                          : recentRate >= 60
+                              ? Colors.orange.shade700
+                              : Colors.red.shade700,
                       fontWeight: FontWeight.w500,
                       fontSize: 13,
                     ),
@@ -849,15 +908,16 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Custom Progress Chart
             SizedBox(
               height: 200,
-              child: _buildCustomChart(takenCount, missedCount, skippedCount, total),
+              child: _buildCustomChart(
+                  takenCount, missedCount, skippedCount, total),
             ),
-            
+
             // Last few doses quick view
             if (history.isNotEmpty) ...[
               const SizedBox(height: 16),
@@ -875,10 +935,13 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                   scrollDirection: Axis.horizontal,
                   itemCount: (history.length > 10 ? 10 : history.length),
                   itemBuilder: (context, index) {
-                    final sortedHistory = [...history]..sort((a, b) => b.scheduledTime.compareTo(a.scheduledTime));
+                    final sortedHistory = [...history]..sort(
+                        (a, b) => b.scheduledTime.compareTo(a.scheduledTime));
                     final historyItem = sortedHistory[index];
-                    final daysDiff = DateTime.now().difference(historyItem.scheduledTime).inDays;
-                    
+                    final daysDiff = DateTime.now()
+                        .difference(historyItem.scheduledTime)
+                        .inDays;
+
                     return Container(
                       margin: const EdgeInsets.only(right: 8),
                       child: Column(
@@ -914,7 +977,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
     );
   }
 
-  Widget _buildCustomChart(int takenCount, int missedCount, int skippedCount, int total) {
+  Widget _buildCustomChart(
+      int takenCount, int missedCount, int skippedCount, int total) {
     if (total == 0) {
       return const Center(
         child: Text(
@@ -936,14 +1000,16 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _buildStatColumn('Taken', takenCount, Colors.green, takenPercent),
-              _buildStatColumn('Missed', missedCount, Colors.red, missedPercent),
-              _buildStatColumn('Skipped', skippedCount, Colors.orange, skippedPercent),
+              _buildStatColumn(
+                  'Missed', missedCount, Colors.red, missedPercent),
+              _buildStatColumn(
+                  'Skipped', skippedCount, Colors.orange, skippedPercent),
             ],
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Overall progress bar
         Container(
           width: double.infinity,
@@ -996,7 +1062,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
     );
   }
 
-  Widget _buildStatColumn(String label, int count, Color color, double percent) {
+  Widget _buildStatColumn(
+      String label, int count, Color color, double percent) {
     return Column(
       children: [
         Expanded(
@@ -1049,7 +1116,7 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
 
   Widget _buildHistoryListTile(MedicationHistory history) {
     final medication = _medicationDetails[history.medicationId];
-    
+
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: _getStatusColor(history.status).withAlpha(50),
@@ -1066,11 +1133,13 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Dosage: ${history.dosage}'),
-          Text('Scheduled: ${DateFormat('HH:mm').format(history.scheduledTime)}'),
+          Text(
+              'Scheduled: ${DateFormat('HH:mm').format(history.scheduledTime)}'),
           if (history.actualTime != null)
             Text('Taken: ${DateFormat('HH:mm').format(history.actualTime!)}'),
           if (history.notes.isNotEmpty)
-            Text('Notes: ${history.notes}', style: const TextStyle(fontStyle: FontStyle.italic)),
+            Text('Notes: ${history.notes}',
+                style: const TextStyle(fontStyle: FontStyle.italic)),
         ],
       ),
       trailing: Chip(
@@ -1157,31 +1226,46 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
 
   Widget _buildDaySummary(DateTime date) {
     final dayHistory = _getHistoryForDate(date);
-    final taken = dayHistory.where((h) => h.status == MedicationStatus.taken).length;
-    final missed = dayHistory.where((h) => h.status == MedicationStatus.missed).length;
-    final skipped = dayHistory.where((h) => h.status == MedicationStatus.skipped).length;
+    final taken =
+        dayHistory.where((h) => h.status == MedicationStatus.taken).length;
+    final missed =
+        dayHistory.where((h) => h.status == MedicationStatus.missed).length;
+    final skipped =
+        dayHistory.where((h) => h.status == MedicationStatus.skipped).length;
     final total = dayHistory.length;
     final rate = total > 0 ? (taken / total * 100) : 0.0;
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: rate >= 80 ? Colors.green.withAlpha(30) : 
-               rate >= 60 ? Colors.orange.withAlpha(30) : Colors.red.withAlpha(30),
+        color: rate >= 80
+            ? Colors.green.withAlpha(30)
+            : rate >= 60
+                ? Colors.orange.withAlpha(30)
+                : Colors.red.withAlpha(30),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: rate >= 80 ? Colors.green : 
-                 rate >= 60 ? Colors.orange : Colors.red,
+          color: rate >= 80
+              ? Colors.green
+              : rate >= 60
+                  ? Colors.orange
+                  : Colors.red,
           width: 1,
         ),
       ),
       child: Row(
         children: [
           Icon(
-            rate >= 80 ? Icons.check_circle : 
-            rate >= 60 ? Icons.warning : Icons.error,
-            color: rate >= 80 ? Colors.green : 
-                   rate >= 60 ? Colors.orange : Colors.red,
+            rate >= 80
+                ? Icons.check_circle
+                : rate >= 60
+                    ? Icons.warning
+                    : Icons.error,
+            color: rate >= 80
+                ? Colors.green
+                : rate >= 60
+                    ? Colors.orange
+                    : Colors.red,
             size: 20,
           ),
           const SizedBox(width: 8),
@@ -1189,8 +1273,11 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
             child: Text(
               'Daily adherence: ${rate.toStringAsFixed(1)}% ($taken/$total)',
               style: TextStyle(
-                color: rate >= 80 ? Colors.green.shade700 : 
-                       rate >= 60 ? Colors.orange.shade700 : Colors.red.shade700,
+                color: rate >= 80
+                    ? Colors.green.shade700
+                    : rate >= 60
+                        ? Colors.orange.shade700
+                        : Colors.red.shade700,
                 fontWeight: FontWeight.w500,
                 fontSize: 13,
               ),
@@ -1239,21 +1326,26 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
     // Calculate weekly adherence for the last 4 weeks
     final now = DateTime.now();
     final weeks = <String, Map<String, int>>{};
-    
+
     for (int i = 3; i >= 0; i--) {
       final weekStart = now.subtract(Duration(days: (i * 7) + now.weekday - 1));
       final weekEnd = weekStart.add(const Duration(days: 6));
       final weekLabel = 'Week ${i + 1}';
-      
+
       final weekHistory = _historyData.values
           .expand((list) => list)
-          .where((h) => h.scheduledTime.isAfter(weekStart) && h.scheduledTime.isBefore(weekEnd.add(const Duration(days: 1))))
+          .where((h) =>
+              h.scheduledTime.isAfter(weekStart) &&
+              h.scheduledTime.isBefore(weekEnd.add(const Duration(days: 1))))
           .toList();
-      
-      final taken = weekHistory.where((h) => h.status == MedicationStatus.taken).length;
-      final missed = weekHistory.where((h) => h.status == MedicationStatus.missed).length;
-      final skipped = weekHistory.where((h) => h.status == MedicationStatus.skipped).length;
-      
+
+      final taken =
+          weekHistory.where((h) => h.status == MedicationStatus.taken).length;
+      final missed =
+          weekHistory.where((h) => h.status == MedicationStatus.missed).length;
+      final skipped =
+          weekHistory.where((h) => h.status == MedicationStatus.skipped).length;
+
       weeks[weekLabel] = {
         'taken': taken,
         'missed': missed,
@@ -1286,7 +1378,7 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                   final taken = weekData['taken'] ?? 0;
                   final adherenceRate = total > 0 ? (taken / total) : 0.0;
                   final barHeight = adherenceRate * 150; // Max height 150
-                  
+
                   return Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -1307,10 +1399,19 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
                               colors: adherenceRate >= 0.8
-                                  ? [Colors.green.shade300, Colors.green.shade600]
+                                  ? [
+                                      Colors.green.shade300,
+                                      Colors.green.shade600
+                                    ]
                                   : adherenceRate >= 0.6
-                                      ? [Colors.orange.shade300, Colors.orange.shade600]
-                                      : [Colors.red.shade300, Colors.red.shade600],
+                                      ? [
+                                          Colors.orange.shade300,
+                                          Colors.orange.shade600
+                                        ]
+                                      : [
+                                          Colors.red.shade300,
+                                          Colors.red.shade600
+                                        ],
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -1323,7 +1424,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                         ),
                         Text(
                           '$taken/$total',
-                          style: const TextStyle(fontSize: 8, color: Colors.grey),
+                          style:
+                              const TextStyle(fontSize: 8, color: Colors.grey),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -1341,32 +1443,36 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
   Widget _buildTimingAnalysis() {
     // Analyze medication timing patterns
     final allHistory = _historyData.values.expand((list) => list).toList();
-    final takenHistory = allHistory.where((h) => h.status == MedicationStatus.taken).toList();
-    
+    final takenHistory =
+        allHistory.where((h) => h.status == MedicationStatus.taken).toList();
+
     // Group by hour of day
     final hourlyData = <int, int>{};
     for (int hour = 0; hour < 24; hour++) {
       hourlyData[hour] = 0;
     }
-    
+
     for (final history in takenHistory) {
       final hour = history.actualTime?.hour ?? history.scheduledTime.hour;
       hourlyData[hour] = (hourlyData[hour] ?? 0) + 1;
     }
-    
+
     // Find peak hours
     final sortedHours = hourlyData.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final peakHours = sortedHours.take(3).toList();
-    
+
     // Calculate on-time percentage
     final onTimeCount = takenHistory.where((h) {
-      if (h.actualTime == null) return true; // Assume on time if no actual time recorded
+      if (h.actualTime == null)
+        return true; // Assume on time if no actual time recorded
       final diff = h.actualTime!.difference(h.scheduledTime).inMinutes.abs();
       return diff <= 30; // Within 30 minutes is considered on time
     }).length;
-    
-    final onTimePercentage = takenHistory.isNotEmpty ? (onTimeCount / takenHistory.length * 100) : 0.0;
+
+    final onTimePercentage = takenHistory.isNotEmpty
+        ? (onTimeCount / takenHistory.length * 100)
+        : 0.0;
 
     return Card(
       elevation: 4,
@@ -1381,7 +1487,7 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            
+
             // On-time statistics
             Row(
               children: [
@@ -1404,24 +1510,27 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Peak hours
             const Text(
               'Most Active Hours:',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            
+
             ...peakHours.take(3).map((entry) {
               final hour = entry.key;
               final count = entry.value;
-              final timeString = hour == 0 ? '12:00 AM' 
-                                : hour < 12 ? '${hour}:00 AM'
-                                : hour == 12 ? '12:00 PM'
-                                : '${hour - 12}:00 PM';
-              
+              final timeString = hour == 0
+                  ? '12:00 AM'
+                  : hour < 12
+                      ? '${hour}:00 AM'
+                      : hour == 12
+                          ? '12:00 PM'
+                          : '${hour - 12}:00 PM';
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.all(12),
@@ -1438,7 +1547,8 @@ class _MedicationHistoryPageState extends State<MedicationHistoryPage>
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(12),

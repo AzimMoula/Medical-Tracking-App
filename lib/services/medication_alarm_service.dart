@@ -247,17 +247,17 @@ class MedicationAlarmService {
   static Future<void> cleanupAllAlarms() async {
     try {
       debugPrint('🧹 Cleaning up all alarms...');
-      
+
       // Get all currently scheduled alarms
       final allAlarms = await Alarm.getAlarms();
       debugPrint('📋 Found ${allAlarms.length} total alarms to clean up');
-      
+
       // Cancel all alarms one by one
       for (final alarm in allAlarms) {
         await Alarm.stop(alarm.id);
         debugPrint('🗑️ Cancelled alarm ID: ${alarm.id}');
       }
-      
+
       debugPrint('✅ All ${allAlarms.length} alarms cleaned up');
     } catch (e) {
       debugPrint('❌ Error cleaning up alarms: $e');
@@ -271,11 +271,11 @@ class MedicationAlarmService {
       if (currentUser == null) return;
 
       debugPrint('🔍 Checking for orphaned alarms...');
-      
+
       // Get all currently scheduled alarms
       final allAlarms = await Alarm.getAlarms();
       debugPrint('📋 Found ${allAlarms.length} total scheduled alarms');
-      
+
       // Get all active medications and their schedules
       final medicationsSnapshot = await FirebaseFirestore.instance
           .collection('medications')
@@ -286,10 +286,10 @@ class MedicationAlarmService {
 
       Set<String> validMedicationIds = {};
       Set<int> validAlarmIds = {};
-      
+
       for (var medicationDoc in medicationsSnapshot.docs) {
         validMedicationIds.add(medicationDoc.id);
-        
+
         final schedulesSnapshot = await FirebaseFirestore.instance
             .collection('medications')
             .doc(currentUser.uid)
@@ -298,26 +298,28 @@ class MedicationAlarmService {
             .collection('schedules')
             .where('is_active', isEqualTo: true)
             .get();
-            
+
         for (var scheduleDoc in schedulesSnapshot.docs) {
           // Generate valid alarm ID for this schedule
-          final int alarmId = _generateAlarmId(medicationDoc.id, scheduleDoc.id);
+          final int alarmId =
+              _generateAlarmId(medicationDoc.id, scheduleDoc.id);
           validAlarmIds.add(alarmId);
         }
       }
-      
-      debugPrint('📋 Found ${validMedicationIds.length} valid medications with ${validAlarmIds.length} valid schedules');
-      
+
+      debugPrint(
+          '📋 Found ${validMedicationIds.length} valid medications with ${validAlarmIds.length} valid schedules');
+
       // Remove orphaned alarms
       int orphanedCount = 0;
       for (final alarm in allAlarms) {
         bool isOrphaned = false;
-        
+
         // Check if alarm ID is not in our valid set
         if (!validAlarmIds.contains(alarm.id)) {
           isOrphaned = true;
         }
-        
+
         // Also check if alarm body contains a medication ID that no longer exists
         if (!isOrphaned && alarm.notificationSettings.body.isNotEmpty) {
           final body = alarm.notificationSettings.body;
@@ -332,14 +334,15 @@ class MedicationAlarmService {
             isOrphaned = true;
           }
         }
-        
+
         if (isOrphaned) {
           await Alarm.stop(alarm.id);
-          debugPrint('🗑️ Removed orphaned alarm ID: ${alarm.id} - ${alarm.notificationSettings.title}');
+          debugPrint(
+              '🗑️ Removed orphaned alarm ID: ${alarm.id} - ${alarm.notificationSettings.title}');
           orphanedCount++;
         }
       }
-      
+
       debugPrint('✅ Cleaned up $orphanedCount orphaned alarms');
     } catch (e) {
       debugPrint('❌ Error cleaning up orphaned alarms: $e');

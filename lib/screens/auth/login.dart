@@ -82,7 +82,8 @@ class _LoginPageState extends State<LoginPage> {
                       if (context.mounted) {
                         Navigator.pop(context);
                         if (result['success']) {
-                          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/', (route) => false);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

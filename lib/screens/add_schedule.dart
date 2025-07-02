@@ -25,7 +25,7 @@ class _AddScheduleState extends State<AddSchedule> {
     super.initState();
     medicationControllers.add(MedicationController());
     medicationCountController.text = '1';
-    
+
     // Check alarm permissions when the page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAlarmPermissions();
@@ -616,13 +616,15 @@ class _AddScheduleState extends State<AddSchedule> {
       debugPrint('🔍 Checking alarm permissions...');
 
       // Request permissions if needed
-      final hasPermissions = await AlarmNotificationService.requestAllPermissions();
+      final hasPermissions =
+          await AlarmNotificationService.requestAllPermissions();
 
       if (!hasPermissions) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('⚠️ Some permissions are missing. Alarms may not work properly.'),
+              content: Text(
+                  '⚠️ Some permissions are missing. Alarms may not work properly.'),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 5),
             ),

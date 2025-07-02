@@ -783,7 +783,8 @@ class _HomePageState extends State<HomePage> {
           final currentAlarms = await Alarm.getAlarms();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Found ${currentAlarms.length} alarms. Cleaning up...'),
+              content:
+                  Text('Found ${currentAlarms.length} alarms. Cleaning up...'),
               duration: const Duration(seconds: 2),
             ),
           );
@@ -792,7 +793,8 @@ class _HomePageState extends State<HomePage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('All alarms cleaned up! Use "Reschedule All Alarms" to set them up again.'),
+              content: Text(
+                  'All alarms cleaned up! Use "Reschedule All Alarms" to set them up again.'),
               backgroundColor: Colors.green,
               duration: Duration(seconds: 4),
             ),
@@ -805,12 +807,14 @@ class _HomePageState extends State<HomePage> {
           final currentAlarms = await Alarm.getAlarms();
           debugPrint('🔍 Current alarms (${currentAlarms.length} total):');
           for (final alarm in currentAlarms) {
-            debugPrint('  - ID: ${alarm.id}, Title: ${alarm.notificationSettings.title}, Time: ${alarm.dateTime}');
+            debugPrint(
+                '  - ID: ${alarm.id}, Title: ${alarm.notificationSettings.title}, Time: ${alarm.dateTime}');
           }
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('📱 Found ${currentAlarms.length} scheduled alarms. Check console for details.'),
+                content: Text(
+                    '📱 Found ${currentAlarms.length} scheduled alarms. Check console for details.'),
                 backgroundColor: Colors.blue,
                 duration: const Duration(seconds: 3),
               ),

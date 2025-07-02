@@ -61,7 +61,8 @@ class AlarmNotificationService {
       debugPrint('🔔 AlarmNotificationService: Starting to schedule alarm');
       debugPrint('🆔 Base ID: $id');
       debugPrint('💊 Medication: $medicationName');
-      debugPrint('⏰ Time: ${time.hour}:${time.minute.toString().padLeft(2, '0')}');
+      debugPrint(
+          '⏰ Time: ${time.hour}:${time.minute.toString().padLeft(2, '0')}');
       debugPrint('🔗 Medication ID: $medicationId');
 
       // Cancel existing alarm first
@@ -69,12 +70,12 @@ class AlarmNotificationService {
 
       // For medication alarms, we schedule a daily recurring alarm
       final scheduledDate = _getNextDailyAlarm(time);
-      
+
       debugPrint('📅 Next alarm scheduled for: $scheduledDate');
 
       // Include medication ID in notification body for rescheduling
-      final notificationBody = medicationId != null 
-          ? '$medicationName - $dosage|$medicationId'  // Include medication ID
+      final notificationBody = medicationId != null
+          ? '$medicationName - $dosage|$medicationId' // Include medication ID
           : '$medicationName - $dosage';
 
       // Create alarm settings with MAXIMUM system-like behavior
@@ -108,8 +109,10 @@ class AlarmNotificationService {
       debugPrint('📋 Total alarms currently set: ${allAlarms.length}');
       for (final alarm in allAlarms) {
         if (alarm.id == id) {
-          debugPrint('🔍 Found our alarm: ID ${alarm.id}, scheduled for ${alarm.dateTime}');
-          debugPrint('📱 Full-screen enabled: ${alarm.androidFullScreenIntent}');
+          debugPrint(
+              '🔍 Found our alarm: ID ${alarm.id}, scheduled for ${alarm.dateTime}');
+          debugPrint(
+              '📱 Full-screen enabled: ${alarm.androidFullScreenIntent}');
           debugPrint('🔊 Volume: ${alarm.volumeSettings.volume}');
         }
       }
@@ -159,7 +162,8 @@ class AlarmNotificationService {
           volumeSettings: VolumeSettings.fixed(volume: 1.0),
           notificationSettings: const NotificationSettings(
             title: '🚨 TEST MEDICATION ALARM',
-            body: 'This is a FULL-SCREEN test alarm - exactly like your medication reminders!',
+            body:
+                'This is a FULL-SCREEN test alarm - exactly like your medication reminders!',
             stopButton: 'Stop Test',
             icon: 'notification_icon',
           ),
@@ -168,18 +172,22 @@ class AlarmNotificationService {
           androidStopAlarmOnTermination: false);
 
       await Alarm.set(alarmSettings: alarmSettings);
-      debugPrint('✅ FULL-SCREEN Test alarm scheduled for ${testTime.toString()}');
-      debugPrint('🔔 This alarm will behave exactly like your medication alarms with FULL-SCREEN');
-      
+      debugPrint(
+          '✅ FULL-SCREEN Test alarm scheduled for ${testTime.toString()}');
+      debugPrint(
+          '🔔 This alarm will behave exactly like your medication alarms with FULL-SCREEN');
+
       // Verify the alarm was set
       final allAlarms = await Alarm.getAlarms();
       final ourAlarm = allAlarms.where((a) => a.id == testId).firstOrNull;
       if (ourAlarm != null) {
         debugPrint('✅ Verification: Test alarm found in scheduled alarms');
         debugPrint('📊 Total alarms now: ${allAlarms.length}');
-        debugPrint('📱 Full-screen enabled: ${ourAlarm.androidFullScreenIntent}');
+        debugPrint(
+            '📱 Full-screen enabled: ${ourAlarm.androidFullScreenIntent}');
       } else {
-        debugPrint('❌ Verification failed: Test alarm not found in scheduled alarms');
+        debugPrint(
+            '❌ Verification failed: Test alarm not found in scheduled alarms');
       }
     } catch (e) {
       debugPrint('❌ Error scheduling test alarm: $e');
@@ -189,13 +197,14 @@ class AlarmNotificationService {
   // Get the next scheduled time for daily recurring alarm
   static DateTime _getNextDailyAlarm(TimeOfDay time) {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-    
+    final today =
+        DateTime(now.year, now.month, now.day, time.hour, time.minute);
+
     // If the time has already passed today, schedule for tomorrow
     if (today.isBefore(now) || today.isAtSameMomentAs(now)) {
       return today.add(const Duration(days: 1));
     }
-    
+
     return today;
   }
 
@@ -209,14 +218,14 @@ class AlarmNotificationService {
   }) async {
     try {
       debugPrint('🔄 Rescheduling recurring alarm for $medicationName');
-      
+
       final nextAlarmTime = _getNextDailyAlarm(time);
-      
+
       // Include medication ID in notification body for future rescheduling
-      final notificationBody = medicationId != null 
+      final notificationBody = medicationId != null
           ? '$medicationName - $dosage|$medicationId'
           : '$medicationName - $dosage';
-      
+
       final alarmSettings = AlarmSettings(
         id: id,
         dateTime: nextAlarmTime,
@@ -237,7 +246,8 @@ class AlarmNotificationService {
       );
 
       await Alarm.set(alarmSettings: alarmSettings);
-      debugPrint('✅ Rescheduled FULL-SCREEN alarm for $medicationName at $nextAlarmTime');
+      debugPrint(
+          '✅ Rescheduled FULL-SCREEN alarm for $medicationName at $nextAlarmTime');
     } catch (e) {
       debugPrint('❌ Error rescheduling recurring alarm: $e');
     }

@@ -16,7 +16,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-  
+
   bool _notificationsEnabled = true;
   bool _soundEnabled = true;
   bool _vibrationEnabled = true;
@@ -24,7 +24,7 @@ class _SettingsPageState extends State<SettingsPage> {
   String _alarmTone = 'marimba.mp3';
   String _snoozeInterval = '5';
   int _maxSnoozes = 3;
-  
+
   bool _isLoading = true;
   String _appVersion = '';
 
@@ -50,7 +50,7 @@ class _SettingsPageState extends State<SettingsPage> {
             .collection('users')
             .doc(user.uid)
             .get();
-        
+
         if (doc.exists) {
           final data = doc.data()!;
           setState(() {
@@ -71,7 +71,7 @@ class _SettingsPageState extends State<SettingsPage> {
             .collection('user_settings')
             .doc(user.uid)
             .get();
-        
+
         if (doc.exists) {
           final data = doc.data()!;
           setState(() {
@@ -142,10 +142,7 @@ class _SettingsPageState extends State<SettingsPage> {
         await user.updateDisplayName(_nameController.text.trim());
 
         // Save additional data to Firestore
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set({
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'name': _nameController.text.trim(),
           'phone': _phoneController.text.trim(),
           'updated_at': Timestamp.now(),
@@ -196,10 +193,14 @@ class _SettingsPageState extends State<SettingsPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildPermissionStatus('Notifications', results[Permission.notification]!),
-              _buildPermissionStatus('Exact Alarms', results[Permission.scheduleExactAlarm]!),
-              _buildPermissionStatus('System Alert Window', results[Permission.systemAlertWindow]!),
-              _buildPermissionStatus('Ignore Battery Optimization', results[Permission.ignoreBatteryOptimizations]!),
+              _buildPermissionStatus(
+                  'Notifications', results[Permission.notification]!),
+              _buildPermissionStatus(
+                  'Exact Alarms', results[Permission.scheduleExactAlarm]!),
+              _buildPermissionStatus('System Alert Window',
+                  results[Permission.systemAlertWindow]!),
+              _buildPermissionStatus('Ignore Battery Optimization',
+                  results[Permission.ignoreBatteryOptimizations]!),
             ],
           ),
           actions: [
@@ -216,7 +217,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildPermissionStatus(String name, PermissionStatus status) {
     Color color;
     IconData icon;
-    
+
     switch (status) {
       case PermissionStatus.granted:
         color = Colors.green;
@@ -448,7 +449,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     try {
                       await AlarmNotificationService.showTestAlarm();
                       if (mounted) {
-                        _showSuccessSnackBar('🔔 Test alarm will ring in 10 seconds');
+                        _showSuccessSnackBar(
+                            '🔔 Test alarm will ring in 10 seconds');
                       }
                     } catch (e) {
                       if (mounted) {
@@ -523,32 +525,39 @@ class _SettingsPageState extends State<SettingsPage> {
             'mozart.mp3',
             'star_wars.mp3',
             'one_piece.mp3',
-          ].map((tone) => Container(
-            margin: const EdgeInsets.only(bottom: 4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: _alarmTone == tone ? Colors.blue.withOpacity(0.1) : null,
-            ),
-            child: RadioListTile<String>(
-              title: Text(
-                tone.replaceAll('.mp3', '').toUpperCase(),
-                style: TextStyle(
-                  fontWeight: _alarmTone == tone ? FontWeight.w600 : FontWeight.normal,
-                  color: _alarmTone == tone ? Colors.blue : Colors.black87,
-                ),
-              ),
-              value: tone,
-              groupValue: _alarmTone,
-              activeColor: Colors.blue,
-              onChanged: (value) {
-                setState(() {
-                  _alarmTone = value!;
-                });
-                _saveSettings();
-                Navigator.pop(context);
-              },
-            ),
-          )).toList(),
+          ]
+              .map((tone) => Container(
+                    margin: const EdgeInsets.only(bottom: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: _alarmTone == tone
+                          ? Colors.blue.withOpacity(0.1)
+                          : null,
+                    ),
+                    child: RadioListTile<String>(
+                      title: Text(
+                        tone.replaceAll('.mp3', '').toUpperCase(),
+                        style: TextStyle(
+                          fontWeight: _alarmTone == tone
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                          color:
+                              _alarmTone == tone ? Colors.blue : Colors.black87,
+                        ),
+                      ),
+                      value: tone,
+                      groupValue: _alarmTone,
+                      activeColor: Colors.blue,
+                      onChanged: (value) {
+                        setState(() {
+                          _alarmTone = value!;
+                        });
+                        _saveSettings();
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ))
+              .toList(),
         ),
         actions: [
           TextButton(
@@ -587,32 +596,40 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: ['1', '5', '10', '15', '30'].map((interval) => Container(
-            margin: const EdgeInsets.only(bottom: 4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: _snoozeInterval == interval ? Colors.orange.withOpacity(0.1) : null,
-            ),
-            child: RadioListTile<String>(
-              title: Text(
-                '$interval minutes',
-                style: TextStyle(
-                  fontWeight: _snoozeInterval == interval ? FontWeight.w600 : FontWeight.normal,
-                  color: _snoozeInterval == interval ? Colors.orange : Colors.black87,
-                ),
-              ),
-              value: interval,
-              groupValue: _snoozeInterval,
-              activeColor: Colors.orange,
-              onChanged: (value) {
-                setState(() {
-                  _snoozeInterval = value!;
-                });
-                _saveSettings();
-                Navigator.pop(context);
-              },
-            ),
-          )).toList(),
+          children: ['1', '5', '10', '15', '30']
+              .map((interval) => Container(
+                    margin: const EdgeInsets.only(bottom: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: _snoozeInterval == interval
+                          ? Colors.orange.withOpacity(0.1)
+                          : null,
+                    ),
+                    child: RadioListTile<String>(
+                      title: Text(
+                        '$interval minutes',
+                        style: TextStyle(
+                          fontWeight: _snoozeInterval == interval
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                          color: _snoozeInterval == interval
+                              ? Colors.orange
+                              : Colors.black87,
+                        ),
+                      ),
+                      value: interval,
+                      groupValue: _snoozeInterval,
+                      activeColor: Colors.orange,
+                      onChanged: (value) {
+                        setState(() {
+                          _snoozeInterval = value!;
+                        });
+                        _saveSettings();
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ))
+              .toList(),
         ),
         actions: [
           TextButton(
@@ -651,32 +668,40 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [1, 2, 3, 5, 10].map((count) => Container(
-            margin: const EdgeInsets.only(bottom: 4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: _maxSnoozes == count ? Colors.purple.withOpacity(0.1) : null,
-            ),
-            child: RadioListTile<int>(
-              title: Text(
-                '$count times',
-                style: TextStyle(
-                  fontWeight: _maxSnoozes == count ? FontWeight.w600 : FontWeight.normal,
-                  color: _maxSnoozes == count ? Colors.purple : Colors.black87,
-                ),
-              ),
-              value: count,
-              groupValue: _maxSnoozes,
-              activeColor: Colors.purple,
-              onChanged: (value) {
-                setState(() {
-                  _maxSnoozes = value!;
-                });
-                _saveSettings();
-                Navigator.pop(context);
-              },
-            ),
-          )).toList(),
+          children: [1, 2, 3, 5, 10]
+              .map((count) => Container(
+                    margin: const EdgeInsets.only(bottom: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: _maxSnoozes == count
+                          ? Colors.purple.withOpacity(0.1)
+                          : null,
+                    ),
+                    child: RadioListTile<int>(
+                      title: Text(
+                        '$count times',
+                        style: TextStyle(
+                          fontWeight: _maxSnoozes == count
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                          color: _maxSnoozes == count
+                              ? Colors.purple
+                              : Colors.black87,
+                        ),
+                      ),
+                      value: count,
+                      groupValue: _maxSnoozes,
+                      activeColor: Colors.purple,
+                      onChanged: (value) {
+                        setState(() {
+                          _maxSnoozes = value!;
+                        });
+                        _saveSettings();
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ))
+              .toList(),
         ),
         actions: [
           TextButton(
@@ -713,7 +738,8 @@ class _SettingsPageState extends State<SettingsPage> {
             const Text('Sign Out'),
           ],
         ),
-        content: const Text('Are you sure you want to sign out of your account?'),
+        content:
+            const Text('Are you sure you want to sign out of your account?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -723,7 +749,8 @@ class _SettingsPageState extends State<SettingsPage> {
             onPressed: () async {
               await AuthService.signOut();
               if (mounted) {
-                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/', (route) => false);
               }
             },
             style: TextButton.styleFrom(
@@ -740,7 +767,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildWelcomeHeader() {
     final user = FirebaseAuth.instance.currentUser;
     final displayName = user?.displayName ?? 'User';
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -866,7 +893,9 @@ class _SettingsPageState extends State<SettingsPage> {
         color: enabled ? Colors.grey[50] : Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: enabled ? Colors.grey.withOpacity(0.3) : Colors.grey.withOpacity(0.2),
+          color: enabled
+              ? Colors.grey.withOpacity(0.3)
+              : Colors.grey.withOpacity(0.2),
         ),
       ),
       child: TextField(
@@ -941,7 +970,9 @@ class _SettingsPageState extends State<SettingsPage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: value ? Colors.blue.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+              color: value
+                  ? Colors.blue.withOpacity(0.1)
+                  : Colors.grey.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(

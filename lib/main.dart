@@ -24,22 +24,22 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  
+
   // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   // Initialize Alarm services with enhanced setup
   debugPrint('🔄 Initializing alarm services...');
   await Alarm.init();
   await AlarmNotificationService.initialize();
-  
+
   // Request critical permissions upfront for system-like behavior
   await AlarmNotificationService.requestAllPermissions();
-  
+
   debugPrint('✅ Alarm services initialized with permissions');
-  
+
   // Schedule alarms if user is logged in
   if (FirebaseAuth.instance.currentUser != null) {
     debugPrint('🔔 User logged in, scheduling all medication alarms...');
@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     _authSubscription =
         FirebaseAuth.instance.authStateChanges().listen(_onAuthChanged);
-    
+
     // Set up global alarm listener for full-screen alarms
     _setupGlobalAlarmListener();
   }
@@ -81,7 +81,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void _onAlarmRinging(AlarmSet alarmSet) {
     debugPrint('🚨 ALARM RINGING DETECTED - Global listener triggered');
     debugPrint('📊 Number of ringing alarms: ${alarmSet.alarms.length}');
-    
+
     if (alarmSet.alarms.isNotEmpty) {
       final firstAlarm = alarmSet.alarms.first;
       debugPrint('🔔 First alarm details:');
@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       debugPrint('   Title: ${firstAlarm.notificationSettings.title}');
       debugPrint('   Body: ${firstAlarm.notificationSettings.body}');
       debugPrint('   Full-screen: ${firstAlarm.androidFullScreenIntent}');
-      
+
       final context = navigatorKey.currentContext;
       if (context != null) {
         debugPrint('✅ Context available - navigating to full-screen alarm');
@@ -102,8 +102,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         );
       } else {
         debugPrint('❌ No context available for alarm navigation');
-        debugPrint('🔍 navigatorKey.currentState: ${navigatorKey.currentState}');
-        debugPrint('🔍 navigatorKey.currentContext: ${navigatorKey.currentContext}');
+        debugPrint(
+            '🔍 navigatorKey.currentState: ${navigatorKey.currentState}');
+        debugPrint(
+            '🔍 navigatorKey.currentContext: ${navigatorKey.currentContext}');
       }
     } else {
       debugPrint('⚠️ No alarms in the ringing set');
