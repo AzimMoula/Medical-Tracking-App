@@ -1,0 +1,2 @@
+C:/Users/zaibg/Desktop/temp/medical_tracking_app/android/app/.cxx/Debug/4r366q5k/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/zaibg/Desktop/temp/medical_tracking_app/android/app/.cxx/Debug/4r366q5k/x86_64/CMakeFiles/rebuild_cache.dir
